@@ -9,26 +9,27 @@ function checkStatusIsDone(e)
 {
   var range = e.range;
   
-  if(range.getColumn() <= 6 && 
-     range.getLastColumn() >=6 )
+  if(range.getColumn() <= 10 && 
+     range.getLastColumn() >=10 )
   {
     var edited_row = range.getRow();
     
-    var status = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Requirements');
+    var status = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('issues_tracking');
     
-    var sheet = status.getRange(edited_row, 6).getValue();
+    var stages = status.getRange(edited_row, 10).getValue();
     
     var owner_name = status.getRange(edited_row, 2).getValue();
     
-    var link = status.getRange(edited_row, 4).getValue();
+    var link = status.getRange(edited_row, 6).getValue();
     
-    var issue = status.getRange(edited_row, 5).getValue();
+    var issue = status.getRange(edited_row, 9).getValue();
     
-    var owner_name_2 = status.getRange(edited_row, 1).getValue();
+    var owner_name_2 = status.getRange(edited_row, 3).getValue(); 
+     
     
-     if(sheet == 'Done' && owner_name_2 != "") //This is for two owners
+      if(stages == 'Done' && owner_name_2 != "") //This is for two owners
     {
-      
+     //SpreadsheetApp.getUi().alert(" The second owner name is: "+owner_name_2) 
       var br_values = 
          {
            flag:2,
@@ -40,9 +41,10 @@ function checkStatusIsDone(e)
       return br_values
 
     }
-    if (sheet == 'Done' && owner_name_2 == "")  
+    if (stages == 'Done' && owner_name_2 == "")  
     { //This is just for one owner
-     
+    
+      //SpreadsheetApp.getUi().alert(" The only owner is: "+owner_name)
       var br_values = 
          {
            flag:1,
@@ -58,12 +60,10 @@ function checkStatusIsDone(e)
 }
 
 function sendEmailOnDone(e)
-{
-  
+{ 
   var br_values = checkStatusIsDone(e);
   
   owner(br_values);
-  
 }
  
 function owner(br_values)
@@ -121,14 +121,12 @@ function owner(br_values)
      
     }
   
-  
   }
-
 }
-  
+ 
 function sendEmail(owners)
 {
-  var templ = HtmlService.createTemplateFromFile('email_subject');
+  var templ = HtmlService.createTemplateFromFile('email');
   
   templ.owners = owners;
   
@@ -140,8 +138,19 @@ function sendEmail(owners)
     subject: "Business Requirement Updated, Issue #" +owners.issue_num,
     htmlBody: message
   });
+  
+  
+  var templ_2 = HtmlService.createTemplateFromFile('mani_email');
+  
+  templ_2.owners = owners;
+  
+  var message2 = templ_2.evaluate().getContent();
+  
+  MailApp.sendEmail({
+    to:"m.kuruvila@adheretech.com", 
+    replyTo: "spec-analysis@adheretech.com",
+    subject: "Business Requirement Updated, Issue #" +owners.issue_num,
+    htmlBody: message2
+  });
 
 }
-
-
-
